@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>White Pages - ISS Cybersecurity Resources</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NORMAL HEADER -->
+<header class="normal-header">
+    <h1>Recommended Cybersecurity Resources</h1>
+</header>
+
+<!-- NAVBAR -->
+<nav>
+    <a href="index.html">Home</a>
+    <a href="media.html">Media</a>
+    <a href="whitepages.html">White Pages</a>
+</nav>
+
+<!-- RESOURCES SECTION -->
+<section>
+    <h2>Recommended Resources</h2>
+    <p>These are useful articles, websites, and books to help you stay safe online:</p>
+
+    <div class="resource-list">
+        <a href="https://www.terranovasecurity.com/what-is-baiting" target="_blank">Terranova Security - What is Baiting</a>
+        <a href="https://www.ncsc.gov.uk/section/about-ncsc/what-is-cyber-security" target="_blank">NCSC UK - What is Cyber Security</a>
+        <a href="https://www.w3schools.com/cybersecurity/index.php" target="_blank">W3schools Cybersecurity</a>
+        <a href="https://www.nist.gov/cyberframework" target="_blank">NIST Cybersecurity Framework</a>
+        <a href="https://www.kaspersky.com/resource-center/threats" target="_blank">Kaspersky Threat Resource Center</a>
+        <a href="https://www.comptia.org/en-us/certifications/security/" target="_blank">CompTIA Security Certification</a>
+    </div>
+</section>
+
+<!-- SELF-CHECK QUESTIONS SECTION -->
+<section style="background: linear-gradient(135deg, #1e293b, #0f172a); padding:30px; border-radius:12px; margin-top:30px; box-shadow:0 0 15px rgba(56,189,248,0.3);">
+    <h2>Self-Check: Are You Cyber Safe?</h2>
+    <p>Click Yes or No for each question. Your selection will be highlighted as you go.</p>
+
+    <div id="quiz" style="max-width:800px; margin:auto;">
+
+        <div class="quiz-question">
+            <p>Do you verify the sender before clicking links or downloading attachments?</p>
+            <button class="quiz-btn" data-value="0">Yes</button>
+            <button class="quiz-btn" data-value="1">No</button>
+        </div>
+
+        <div class="quiz-question">
+            <p>Are you cautious about free offers, USB drives, or suspicious downloads?</p>
+            <button class="quiz-btn" data-value="0">Yes</button>
+            <button class="quiz-btn" data-value="1">No</button>
+        </div>
+
+        <div class="quiz-question">
+            <p>Do you use strong, unique passwords and update them regularly?</p>
+            <button class="quiz-btn" data-value="0">Yes</button>
+            <button class="quiz-btn" data-value="1">No</button>
+        </div>
+
+        <div class="quiz-question">
+            <p>Have you enabled two-factor authentication where possible?</p>
+            <button class="quiz-btn" data-value="0">Yes</button>
+            <button class="quiz-btn" data-value="1">No</button>
+        </div>
+
+        <div class="quiz-question">
+            <p>Do you check website URLs carefully to avoid typosquatting?</p>
+            <button class="quiz-btn" data-value="0">Yes</button>
+            <button class="quiz-btn" data-value="1">No</button>
+        </div>
+
+        <div class="quiz-question">
+            <p>Do you report suspicious emails or messages instead of ignoring them?</p>
+            <button class="quiz-btn" data-value="0">Yes</button>
+            <button class="quiz-btn" data-value="1">No</button>
+        </div>
+
+    </div>
+
+    <div id="quiz-result" style="text-align:center; margin-top:30px; font-size:20px; font-weight:bold;"></div>
+
+    <div style="text-align:center; margin-top:20px;">
+        <button id="reset-quiz" class="hero-btn">Reset Quiz</button>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>ISS Cybersecurity Project - Created by Tevin Bain </p>
+</footer>
+
+<script>
+const buttons = document.querySelectorAll(".quiz-btn");
+const resetBtn = document.getElementById("reset-quiz");
+let score = 0;
+let answered = 0;
+const totalQuestions = document.querySelectorAll(".quiz-question").length;
+
+function resetQuiz() {
+    score = 0;
+    answered = 0;
+    document.getElementById("quiz-result").innerHTML = "";
+    document.querySelectorAll(".quiz-question").forEach(q => {
+        q.querySelectorAll(".quiz-btn").forEach(btn => {
+            btn.disabled = false;
+            btn.style.backgroundColor = "#0f172a";
+            btn.style.color = "#38bdf8";
+            btn.style.opacity = "1";
+        });
+    });
+}
+
+buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const parent = btn.parentElement;
+
+        // Highlight clicked button
+        parent.querySelectorAll(".quiz-btn").forEach(b => {
+            b.style.backgroundColor = "#0f172a";
+            b.style.color = "#38bdf8";
+        });
+        btn.style.backgroundColor = "#16a34a"; // green
+        btn.style.color = "white";
+
+        // Disable buttons for score calculation
+        if(!btn.dataset.answered){
+            score += parseInt(btn.dataset.value);
+            answered++;
+            btn.dataset.answered = "true";
+        }
+
+        // Calculate final result when all answered
+        if(answered === totalQuestions){
+            const resultDiv = document.getElementById("quiz-result");
+            if(score === 0){
+                resultDiv.innerHTML = "🎉 Excellent! You are practicing safe cybersecurity habits!";
+                resultDiv.style.color = "#38bdf8";
+            } else if(score <= 2){
+                resultDiv.innerHTML = "⚠️ Warning: You have some risky habits. Review the resources!";
+                resultDiv.style.color = "#facc15";
+            } else {
+                resultDiv.innerHTML = "❌ You are at high risk! Improve your cybersecurity practices!";
+                resultDiv.style.color = "#f87171";
+            }
+        }
+    });
+});
+
+resetBtn.addEventListener("click", resetQuiz);
+</script>
+
+</body>
+</html>

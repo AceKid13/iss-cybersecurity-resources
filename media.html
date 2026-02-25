@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media - ISS Cybersecurity Resources</title>
+<link rel="stylesheet" href="style.css">
+
+<script>
+function openPoster(src){
+    document.getElementById("modalImg").src = src;
+    document.getElementById("posterModal").style.display = "block";
+}
+</script>
+</head>
+
+<body>
+
+<!-- NORMAL HEADER -->
+<header class="normal-header">
+    <h1>Cybersecurity Awareness Media</h1>
+</header>
+
+<!-- NAVBAR -->
+<nav>
+    <a href="index.html">Home</a>
+    <a href="media.html">Media</a>
+    <a href="whitepages.html">White Pages</a>
+</nav>
+
+<!-- LOCAL VIDEO SECTION -->
+<section>
+    <h2>Awareness Video</h2>
+    <p>Watch this short video explaining Baiting and Typo Squatting and how to stay safe online.</p>
+
+    <!-- Local Video -->
+    <video controls autoplay muted loop playsinline 
+        style="width:100%; max-width:800px; display:block; margin:20px auto; border-radius:12px; box-shadow:0 0 15px rgba(56,189,248,0.3);">
+        <source src="media-video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Backup YouTube Button -->
+    <p style="text-align:center; margin-top:15px;">
+        <a href="https://youtu.be/yFoPVjFO8QI" target="_blank" class="hero-btn">
+            Watch on YouTube
+        </a>
+    </p>
+</section>
+
+<!-- POSTER SECTION -->
+<section>
+    <h2>Cybersecurity Awareness Poster</h2>
+    <p>This poster highlights key signs of Baiting and Typo Squatting attacks and tips for avoiding them.</p>
+
+    <img src="poster.png" class="poster-img" onclick="openPoster(this.src)" 
+        style="display:block;margin:auto;">
+
+    <!-- Modal container -->
+    <div id="posterModal" class="modal" onclick="this.style.display='none'">
+        <img id="modalImg">
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>ISS Cybersecurity Project - Created by Tevin Bain</p>
+</footer>
+
+</body>
+</html>
