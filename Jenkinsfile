@@ -1,14 +1,16 @@
 pipeline {
     agent any
-    
+
     triggers {
         githubPush()
     }
 
     environment {
-        SITE_NAME = "jenkinstest"
-        WEB_ROOT  = "/var/www/jenkinstest"
+        SITE_NAME  = "jenkinstest"
+        WEB_ROOT   = "/var/www/jenkinstest"
         NGINX_CONF = "/etc/nginx/sites-available/jenkinstest"
+        REPO_URL   = "https://github.com/AceKid13/iss-cybersecurity-resources.git"
+        BRANCH_NAME = "main"
     }
 
     options {
@@ -19,7 +21,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/kestonbhola/jenkinstest.git/', branch: 'main'
+                git url: "${REPO_URL}", branch: "${BRANCH_NAME}"
             }
         }
 
@@ -30,10 +32,10 @@ pipeline {
                     echo "Checking required project files..."
 
                     test -f index.html
-                    test -f sgustyle.css
-                    test -f sguscript.js
+                    test -f style.css
 
                     echo "Required files found."
+                    echo "Project contents:"
                     ls -la
                 '''
             }
@@ -44,7 +46,7 @@ pipeline {
                 sh '''
                     set -e
                     sudo apt update
-                    sudo apt install -y nginx
+                    sudo apt install -y nginx rsync
                 '''
             }
         }
@@ -64,13 +66,15 @@ pipeline {
                 sh '''
                     set -e
 
+                    echo "Cleaning old deployed files..."
                     rm -rf "$WEB_ROOT"/*
-                    cp index.html "$WEB_ROOT"/
-                    cp sgustyle.css "$WEB_ROOT"/
-                    cp sguscript.js "$WEB_ROOT"/
 
-                    [ -f grenada.jpeg ] && cp grenada.jpeg "$WEB_ROOT"/ || true
-                    [ -f grenada-updated.jpeg ] && cp grenada-updated.jpeg "$WEB_ROOT"/ || true
+                    echo "Copying website files..."
+                    rsync -av --delete \
+                        --exclude='.git' \
+                        --exclude='Jenkinsfile' \
+                        --exclude='Jenkinsfile.txt' \
+                        ./ "$WEB_ROOT"/
 
                     echo "Deployed files:"
                     ls -la "$WEB_ROOT"
