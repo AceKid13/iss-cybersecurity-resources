@@ -6,10 +6,10 @@ pipeline {
     }
 
     environment {
-        SITE_NAME  = "jenkinstest"
-        WEB_ROOT   = "/var/www/jenkinstest"
-        NGINX_CONF = "/etc/nginx/sites-available/jenkinstest"
-        REPO_URL   = "https://github.com/AceKid13/iss-cybersecurity-resources.git"
+        SITE_NAME   = "jenkinstest"
+        WEB_ROOT    = "/var/www/jenkinstest"
+        NGINX_CONF  = "/etc/nginx/sites-available/jenkinstest"
+        REPO_URL    = "https://github.com/AceKid13/iss-cybersecurity-resources.git"
         BRANCH_NAME = "main"
     }
 
@@ -41,12 +41,26 @@ pipeline {
             }
         }
 
-        stage('Install Nginx') {
+        stage('Install Nginx and rsync if missing') {
             steps {
                 sh '''
                     set -e
-                    sudo apt update
-                    sudo apt install -y nginx rsync
+
+                    if ! command -v nginx >/dev/null 2>&1; then
+                        echo "Nginx not found. Installing..."
+                        sudo apt update
+                        sudo apt install -y nginx
+                    else
+                        echo "Nginx already installed."
+                    fi
+
+                    if ! command -v rsync >/dev/null 2>&1; then
+                        echo "rsync not found. Installing..."
+                        sudo apt update
+                        sudo apt install -y rsync
+                    else
+                        echo "rsync already installed."
+                    fi
                 '''
             }
         }
@@ -87,7 +101,7 @@ pipeline {
                 sh '''
                     set -e
 
-                    sudo bash -c "cat > $NGINX_CONF" <<EOF
+                    sudo tee "$NGINX_CONF" > /dev/null <<EOF
 server {
     listen 80;
     server_name _;
