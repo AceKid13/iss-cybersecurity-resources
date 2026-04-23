@@ -6,11 +6,12 @@ pipeline {
     }
 
     environment {
-        SITE_NAME   = "jenkinstest"
-        WEB_ROOT    = "/var/www/jenkinstest"
-        NGINX_CONF  = "/etc/nginx/sites-available/jenkinstest"
-        REPO_URL    = "https://github.com/AceKid13/iss-cybersecurity-resources.git"
-        BRANCH_NAME = "main"
+        REPO_URL       = "https://github.com/AceKid13/iss-cybersecurity-resources.git"
+        BRANCH_NAME    = "main"
+        IMAGE_NAME     = "jenkinstest-image"
+        CONTAINER_NAME = "jenkinstest-container"
+        HOST_PORT      = "8081"
+        CONTAINER_PORT = "80"
     }
 
     options {
@@ -33,6 +34,8 @@ pipeline {
 
                     test -f index.html
                     test -f style.css
+                    test -f Dockerfile
+                    test -f nginx.conf
 
                     echo "Required files found."
                     echo "Project contents:"
@@ -41,95 +44,45 @@ pipeline {
             }
         }
 
-        stage('Install Nginx and rsync if missing') {
+        stage('Check Docker') {
             steps {
                 sh '''
                     set -e
-
-                    if ! command -v nginx >/dev/null 2>&1; then
-                        echo "Nginx not found. Installing..."
-                        sudo apt update
-                        sudo apt install -y nginx
-                    else
-                        echo "Nginx already installed."
-                    fi
-
-                    if ! command -v rsync >/dev/null 2>&1; then
-                        echo "rsync not found. Installing..."
-                        sudo apt update
-                        sudo apt install -y rsync
-                    else
-                        echo "rsync already installed."
-                    fi
+                    docker --version
+                    docker ps
                 '''
             }
         }
 
-        stage('Create Web Root') {
+        stage('Build Docker Image') {
             steps {
                 sh '''
                     set -e
-                    sudo mkdir -p "$WEB_ROOT"
-                    sudo chown -R jenkins:jenkins "$WEB_ROOT"
+                    docker build -t "$IMAGE_NAME" .
                 '''
             }
         }
 
-        stage('Deploy Website Files') {
+        stage('Stop Old Container') {
             steps {
                 sh '''
+                    set +e
+                    docker stop "$CONTAINER_NAME"
+                    docker rm "$CONTAINER_NAME"
                     set -e
-
-                    echo "Cleaning old deployed files..."
-                    rm -rf "$WEB_ROOT"/*
-
-                    echo "Copying website files..."
-                    rsync -av --delete \
-                        --exclude='.git' \
-                        --exclude='Jenkinsfile' \
-                        --exclude='Jenkinsfile.txt' \
-                        ./ "$WEB_ROOT"/
-
-                    echo "Deployed files:"
-                    ls -la "$WEB_ROOT"
                 '''
             }
         }
 
-        stage('Configure Nginx Site') {
+        stage('Run New Container') {
             steps {
                 sh '''
                     set -e
-
-                    sudo tee "$NGINX_CONF" > /dev/null <<EOF
-server {
-    listen 80;
-    server_name _;
-
-    root $WEB_ROOT;
-    index index.html;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-}
-EOF
-
-                    sudo ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/jenkinstest
-                    sudo rm -f /etc/nginx/sites-enabled/default
-
-                    sudo nginx -t
-                '''
-            }
-        }
-
-        stage('Start Nginx') {
-            steps {
-                sh '''
-                    set -e
-                    sudo systemctl enable nginx
-                    sudo systemctl restart nginx
-                    sudo systemctl status nginx --no-pager
+                    docker run -d \
+                      --name "$CONTAINER_NAME" \
+                      -p "$HOST_PORT":"$CONTAINER_PORT" \
+                      --restart unless-stopped \
+                      "$IMAGE_NAME"
                 '''
             }
         }
@@ -138,7 +91,7 @@ EOF
             steps {
                 sh '''
                     set -e
-                    curl -I http://localhost
+                    curl -I http://localhost:8081
                 '''
             }
         }
@@ -146,8 +99,8 @@ EOF
 
     post {
         success {
-            echo 'Deployment successful.'
-            echo 'Open your EC2 public IP in a browser to view the site.'
+            echo 'Docker deployment successful.'
+            echo 'Open your EC2 public IP in a browser with port 8081.'
         }
         failure {
             echo 'Deployment failed. Check the Jenkins console output.'
